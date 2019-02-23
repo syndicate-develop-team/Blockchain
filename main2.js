@@ -7,14 +7,20 @@ class Block{
         this.data = data;
         this.previousHash = previousHash;
         this.hash = this.calculateHash();
+        this.nounce = "0";
     }
 
     calculateHash(){
-        return SHA256(this.index + this.previousHash + this.timestamp + JSON.stringify(this.data)).toString();
+        return SHA256(this.index + this.previousHash + this.timestamp + JSON.stringify(this.data) + this.nounce) .toString();
     }
 
     mineBlock(difficulty){
-        while(this.hash.substring(0,difficulty) !== Array)
+        while(this.hash.substring(0,difficulty) !== Array(difficulty + 1).join("0")){
+            this.nounce++;
+            this.hash = this.calculateHash();
+        }
+
+        console.log("Block Mined: " + this.hash);
     }
 
 }
@@ -24,6 +30,7 @@ class Block{
 class Blockchain{
     constructor(){
         this.chain = [this.CreateGenesisBlock()];
+        this.difficulty = 5;
     }
 
     CreateGenesisBlock(){
@@ -36,7 +43,7 @@ class Blockchain{
 
     addBlock(newBlock){
         newBlock.previousHash = this.getLatestBlock().hash;
-        newBlock.hash = newBlock.calculateHash();
+        newBlock.mineBlock(this.difficulty);
         this.chain.push(newBlock);
     }
 
@@ -57,18 +64,8 @@ class Blockchain{
     }
 }
 
-let Syncoin = new Blockchain()
+let Syncoin = new Blockchain();
+
 Syncoin.addBlock(new Block(1,"02/23/2019",{amount: 16}));
+
 Syncoin.addBlock(new Block(2,"02/27/2019",{amount: 10}));
-
-console.log("Is chian Valid?  " + Syncoin.isChainValid());
-
-console.log(JSON.stringify(Syncoin,null,4));
-
-//Syncoin.chain[1].data = {amount: 100};
-
-//Syncoin.chain[1].hash = Syncoin.chain[1].calculateHash();
-
-//console.log(JSON.stringify(Syncoin,null,4));
-
-//console.log("Is chian Valid?  " + Syncoin.isChainValid());
